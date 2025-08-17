@@ -6,7 +6,7 @@ __pycache__/
 .filecount_metadata/
 
 # Internal planning documents
-DOCS/PLANS.md
+docs/PLANS.md
 
 # IDE and OS files
 .idea/
