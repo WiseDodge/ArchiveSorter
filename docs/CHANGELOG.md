@@ -19,6 +19,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Enhanced File Moving Logic**: The script now discovers existing folders before moving files to avoid creating duplicates.
 - **Metadata Storage Evolution**: Migrated from per-folder JSON files to a single centralized metadata file for efficiency.
 
+### Fixed
+- **Windows Naming Errors**: Updated folder suffix format from `[File Count: N]` to `(File Count - N)` to prevent filesystem errors.
+
 ### Upcoming Features & Improvements
 - **Advanced Duplicate Detection**
 - **Metadata Enrichment**

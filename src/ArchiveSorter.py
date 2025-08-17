@@ -60,9 +60,6 @@ def discover_existing_folders(dest_root, misc_folder):
     return existing_folders
 
 def update_folder_name_with_file_count(folder_path, metadata, script_dir, cwd):
-    """
-    Renames folder to include [File Count: n] only when the count changes (reference metadata). Also skips renaming script or the current working directory.
-    """
     folder_path_abs = os.path.abspath(folder_path)
 
     # Skip renaming the folder where the script/current working directory is located
