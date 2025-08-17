@@ -5,87 +5,38 @@ import json
 import sys
 
 # Configure your source and destination here
-source_dir = r'D:\Downloads'  # Folder to scan files from
-dest_root = r'D:\CODING\ARCHIVES'  # Destination root folder to move files to
+source_dir = r'D:\Downloads'
+dest_root = r'D:\CODING\ARCHIVES'
 misc_folder = 'MISCELLANEOUS'
 
-# Folder to store JSON metadata; relative to the script current working directory
+# Central metadata file path
 metadata_folder = os.path.join(os.getcwd(), '.filecount_metadata')
 os.makedirs(metadata_folder, exist_ok=True)
+metadata_file_path = os.path.join(metadata_folder, 'metadata.json')
 
-# Mappings of extensions to folder names
-extension_to_folder = {
-    # Images (excluding GIFS)
-    'jpg': 'IMAGES',
-    'jpeg': 'IMAGES',
-    'png': 'IMAGES',
-    'avif': 'IMAGES',
-    'webp': 'IMAGES',
-    'bmp': 'IMAGES',
-    'tiff': 'IMAGES',
-    'jfif': 'IMAGES',
+# Load metadata dictionary {folder_path (abs): count}
+def load_metadata():
+    if os.path.isfile(metadata_file_path):
+        try:
+            with open(metadata_file_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
 
-    'gif': 'GIFS',
+# Save metadata dictionary {folder_path (abs): count}
+def save_metadata(data):
+    with open(metadata_file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2)
 
-    # Videos
-    'mp4': 'VIDEOS',
-    'mov': 'VIDEOS',
-    'mkv': 'VIDEOS',
-    'avi': 'VIDEOS',
-
-    # Scripts separately
-    'js': 'JS',
-    'json': 'JSON',
-    'css': 'CSS',
-    'html': 'HTML',
-
-    # Others
-    'log': 'LOG',
-    'pdf': 'PDFS',
-    'py': 'PYTHON',
-    'txt': 'TXT',
-    'zip': 'ZIPS',
-    'sk': 'SKRIPT',
-    # Add more mappings as needed
-}
-
-# Regex to strip the existing [File Count: N] suffix from folder names
-FILE_COUNT_SUFFIX_RE = re.compile(r'^(.*?)(\s*\[File Count: \d+\])?$', re.IGNORECASE)
+# Regex to strip the (File Count - N) suffix from folder names
+FILE_COUNT_SUFFIX_RE = re.compile(r'^(.*?)(\s*\(File Count - \d+\))?$', re.IGNORECASE)
 
 def strip_file_count_suffix(folder_name):
-    """Removes trailing [File Count: N] suffix from folder names."""
     match = FILE_COUNT_SUFFIX_RE.match(folder_name)
     if match:
         return match.group(1).strip()
     return folder_name
-
-def encode_path_to_filename(path):
-    """
-    Encodes a filesystem path into its safe filename for metadata storage.
-    Also replaces path  separators with underscores.
-    """
-    return path.replace(os.sep, '_').replace(':', '_') + '.json'
-
-def load_metadata(folder_path):
-    """Loads the file count from metadata JSON file; and returns None if its missing or from error."""
-    encoded_name = encode_path_to_filename(folder_path)
-    meta_path = os.path.join(metadata_folder, encoded_name)
-    if os.path.isfile(meta_path):
-        try:
-            with open(meta_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return data.get('count')
-        except Exception: 
-            return None
-    return None
-
-def save_metadata(folder_path, count):
-    """Saves the file count to metadata JSON file."""
-    encoded_name = encode_path_to_filename(folder_path)
-    meta_path = os.path.join(metadata_folder, encoded_name)
-    data = {'count': count}
-    with open(meta_path, 'w', encoding='utf-8') as f:
-        json.dump(data, f)
 
 def discover_existing_folders(dest_root, misc_folder):
     """
@@ -95,7 +46,7 @@ def discover_existing_folders(dest_root, misc_folder):
     existing_folders = {}
     for folder in os.listdir(dest_root):
         full_path = os.path.join(dest_root, folder)
-        if os.path.isdir(full_path) and folder.upper() != misc_folder:
+        if os.path.isdir(full_path) and strip_file_count_suffix(folder).upper() != misc_folder:
             normalized = strip_file_count_suffix(folder).upper()
             existing_folders[normalized] = full_path
 
@@ -108,7 +59,7 @@ def discover_existing_folders(dest_root, misc_folder):
                 existing_folders[normalized] = full_path
     return existing_folders
 
-def update_folder_name_with_file_count(folder_path, script_dir, cwd):
+def update_folder_name_with_file_count(folder_path, metadata, script_dir, cwd):
     """
     Renames folder to include [File Count: n] only when the count changes (reference metadata). Also skips renaming script or the current working directory.
     """
@@ -128,7 +79,7 @@ def update_folder_name_with_file_count(folder_path, script_dir, cwd):
     except FileNotFoundError:
         return
 
-    previous_count = load_metadata(folder_path)
+    previous_count = metadata.get(folder_path_abs)
 
     if previous_count == current_count:
         return
@@ -140,22 +91,24 @@ def update_folder_name_with_file_count(folder_path, script_dir, cwd):
             try:
                 os.rename(folder_path, new_folder_path)
                 print(f"Renamed folder: '{folder_name}' -> '{new_folder_name}'")
-                save_metadata(new_folder_path, current_count)
+                metadata[new_folder_path] = current_count
+                metadata.pop(folder_path_abs, None)
             except PermissionError as e:
                 print(f"PermissionError renaming folder '{folder_name}': {e}")
-                # On error, still update the metadata to avoid repeated attempts
-                save_metadata(folder_path, current_count)
+                # If renaming fails, just update the metadata
+                metadata[folder_path_abs] = current_count
         else:
-            # If the new folder name already exists, just update the metadata for the existing folder
-            save_metadata(folder_path, current_count)
+            # If the new folder name already exists, just update the metadata
+            metadata[folder_path_abs] = current_count
     else:
         # If the name is the same, just update the metadata
-        save_metadata(folder_path, current_count)
+        metadata[folder_path_abs] = current_count
 
 def move_files_by_extension(src, dst):
     existing_folders = discover_existing_folders(dst, misc_folder)
     script_dir = os.path.abspath(os.path.dirname(__file__))
     cwd = os.path.abspath(os.getcwd())
+    metadata = load_metadata()
     for root, dirs, files in os.walk(src):
         for file in files:
             ext = os.path.splitext(file)[1].lower().lstrip('.')
@@ -187,16 +140,27 @@ def move_files_by_extension(src, dst):
     for folder in os.listdir(dst):
         full_folder_path = os.path.join(dst, folder)
         if os.path.isdir(full_folder_path) and strip_file_count_suffix(folder).upper() != misc_folder:
-            update_folder_name_with_file_count(full_folder_path, script_dir, cwd)
+            update_folder_name_with_file_count(full_folder_path, metadata, script_dir, cwd)
 
     misc_path = os.path.join(dst, misc_folder)
     if os.path.isdir(misc_path):
         for folder in os.listdir(misc_path):
             full_folder_path = os.path.join(misc_path, folder)
             if os.path.isdir(full_folder_path):
-                update_folder_name_with_file_count(full_folder_path, script_dir, cwd)
+                update_folder_name_with_file_count(full_folder_path, metadata, script_dir, cwd)
+    save_metadata(metadata)
 
 if __name__ == '__main__':
+    # Mapping of extensions to desired folder names (keep your full mapping here)
+    extension_to_folder = {
+        'jpg': 'IMAGES', 'jpeg': 'IMAGES', 'png': 'IMAGES', 'avif': 'IMAGES', 'webp': 'IMAGES',
+        'bmp': 'IMAGES', 'tiff': 'IMAGES', 'jfif': 'IMAGES',
+        'gif': 'GIFS',
+        'mp4': 'VIDEOS', 'mov': 'VIDEOS', 'mkv': 'VIDEOS', 'avi': 'VIDEOS',
+        'js': 'JS', 'json': 'JSON', 'css': 'CSS', 'html': 'HTML',
+        'log': 'LOG', 'pdf': 'PDFS', 'py': 'PYTHON', 'txt': 'TXT', 'zip': 'ZIPS', 'sk': 'SKRIPT',
+        # Add more if needed
+    }
     try:
         move_files_by_extension(source_dir, dest_root)
         print("File transfer complete. Check your ARCHIVES directory to verify.")

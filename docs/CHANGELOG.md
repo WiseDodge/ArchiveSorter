@@ -11,12 +11,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - **Core File Sorting Engine**: Organizes files from a source directory into a destination archive based on `extension_to_folder` mappings.
 - **Dynamic Folder Creation**: Automatically creates destination folders for new file types, including subfolders under `MISCELLANEOUS` for unknown extensions.
-- **File Count Suffix**: Appends a fle count to the folder names (e.g., `IMAGES (File Count - 10)`).
-- **Metadata Management**: Creates a per-folder JSON files to track file counts and then determines when to rename the folders.
+- **File Count Suffix**: Appends a file count to folder names (e.g., `IMAGES (File Count - 10)`).
+- **Metadata Management**: Creates per-folder JSON files to track file counts and determine when to rename folders.
 - **Safe Duplicate Filename Handling**: Renames files with conflicting names in the destination to avoid overwriting.
 
 ### Changed
 - **Enhanced File Moving Logic**: The script now discovers existing folders before moving files to avoid creating duplicates.
+- **Metadata Storage Evolution**: Migrated from per-folder JSON files to a single centralized metadata file for efficiency.
 
 ### Upcoming Features & Improvements
 - **Advanced Duplicate Detection**
