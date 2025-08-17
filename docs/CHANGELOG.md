@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - **Core File Sorting Engine**: Organizes files from a source directory into a destination archive based on `extension_to_folder` mappings.
 - **Dynamic Folder Creation**: Automatically creates destination folders for new file types, including subfolders under `MISCELLANEOUS` for unknown extensions.
+- **File Count Suffix**: Appends a fle count to the folder names (e.g., `IMAGES (File Count - 10)`).
+- **Metadata Management**: Creates a per-folder JSON files to track file counts and then determines when to rename the folders.
 - **Safe Duplicate Filename Handling**: Renames files with conflicting names in the destination to avoid overwriting.
 
 ### Changed

@@ -10,13 +10,15 @@ Keeps your downloads and miscellaneous files neatly organized by sorting files f
 
 - 🗂️ **Automated File Sorting** — Organizes files by their extension into dedicated folders like `IMAGES`, `VIDEOS`, etc.
 - **Dynamic Folder Creation** — Creates destination folders automatically for new file types.
+- 🔢 **File Count Suffix** — Appends `(File Count - N)` to folder names to track contents.
+- 📊 **Metadata Tracking** — Maintains file counts in a `.filecount_metadata` folder for efficient updates.
 - **Safe Duplicate Filename Handling** — Renames files with conflicting names to avoid overwriting.
 
 ---
 
 ## 📂 How It Works
 
-The script scans your `source_dir` and moves files into specific archive folders inside `dest_root`. Files with unknown or no extensions go into a `MISCELLANEOUS` folder.
+The script scans your `source_dir` and moves files into specific archive folders inside `dest_root`. Files with unknown or no extensions go into a `MISCELLANEOUS` folder. It then updates folder names to reflect their current file counts.
 
 ---
 
