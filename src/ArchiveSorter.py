@@ -40,18 +40,26 @@ def save_metadata(data):
 
 def discover_existing_folders(dest_root, misc_folder):
     existing_folders = {}
-    for folder in os.listdir(dest_root):
-        full_path = os.path.join(dest_root, folder)
-        if os.path.isdir(full_path) and strip_file_count_suffix(folder).upper() != misc_folder:
-            normalized = strip_file_count_suffix(folder).upper()
-            existing_folders[normalized] = full_path
+    for item in os.listdir(dest_root):
+        full_path = os.path.join(dest_root, item)
+        if os.path.isdir(full_path):
+            for root, dirs, _ in os.walk(full_path):
+                for d in dirs:
+                    nested_path = os.path.join(root, d)
+                    relative_path = os.path.relpath(nested_path, dest_root)
+                    normalized_key = relative_path.replace(os.sep, '/').upper()
+                    existing_folders[normalized_key] = nested_path
+            if strip_file_count_suffix(item).upper() != misc_folder:
+                normalized = strip_file_count_suffix(item).upper()
+                if normalized not in existing_folders:
+                     existing_folders[normalized] = full_path
 
     misc_path = os.path.join(dest_root, misc_folder)
     if os.path.isdir(misc_path):
         for folder in os.listdir(misc_path):
             full_path = os.path.join(misc_path, folder)
             if os.path.isdir(full_path):
-                normalized = f"{misc_folder}\\{strip_file_count_suffix(folder).upper()}"
+                normalized = f"{misc_folder}/{strip_file_count_suffix(folder).upper()}"
                 existing_folders[normalized] = full_path
     return existing_folders
 
@@ -115,17 +123,18 @@ def move_files_by_extension(src, dst):
     for root, dirs, files in os.walk(src):
         for file in files:
             ext = os.path.splitext(file)[1].lower().lstrip('.')
-            
+
             if ext in extension_to_folder:
                 folder_name = extension_to_folder[ext]
                 key = folder_name.upper()
-                dest_folder = existing_folders.get(key, os.path.join(dst, folder_name))
+                dest_folder = existing_folders.get(key, os.path.join(dst, *folder_name.split('/')))
             elif ext:
-                misc_key = f"{misc_folder}\\{ext.upper()}"
+                misc_key = f"{misc_folder}/{ext.upper()}"
                 dest_folder = existing_folders.get(misc_key, os.path.join(dst, misc_folder, ext.upper()))
             else:
-                noextension_key = f"{misc_folder}\\NO_EXTENSION"
-                dest_folder = existing_folders.get(noextension_key, os.path.join(dst, misc_folder, 'NO_EXTENSION'))
+                noext_key = f"{misc_folder}/NO_EXTENSION"
+                dest_folder = existing_folders.get(noext_key, os.path.join(dst, misc_folder, 'NO_EXTENSION'))
+
             os.makedirs(dest_folder, exist_ok=True)
 
             src_path = os.path.join(root, file)
@@ -139,61 +148,57 @@ def move_files_by_extension(src, dst):
 
             shutil.move(src_path, dest_path)
             print(f"Moved: {src_path} --> {dest_path}")
-        break # Should process top-level files only
+        break
 
-    # Once the files are moved, update the file counts for all existing folders
-    internal_reorganized = reorganize_internal_files(dst, misc_folder, existing_folders)
+    reorganize_internal_files(dst, misc_folder)
 
-    # Update folder names and metadata for all primary and misc folders
-    for folder in os.listdir(dst):
-        full_folder_path = os.path.join(dst, folder)
-        if os.path.isdir(full_folder_path) and strip_file_count_suffix(folder).upper() != misc_folder:
-            update_folder_name_with_file_count(full_folder_path, metadata, script_dir, cwd)
+    # Updates folder names and metadata for all primary and misc folders
+    all_dirs = set()
+    for root, dirs, _ in os.walk(dst):
+        for d in dirs:
+            all_dirs.add(os.path.join(root, d))
 
-    misc_path = os.path.join(dst, misc_folder)
-    if os.path.isdir(misc_path):
-        for folder in os.listdir(misc_path):
-            full_folder_path = os.path.join(misc_path, folder)
-            if os.path.isdir(full_folder_path):
-                update_folder_name_with_file_count(full_folder_path, metadata, script_dir, cwd)
+    for folder_path in all_dirs:
+        if strip_file_count_suffix(os.path.basename(folder_path)).upper() != misc_folder:
+            update_folder_name_with_file_count(folder_path, metadata, script_dir, cwd)
+
     save_metadata(metadata)
 
 def reorganize_internal_files(dst_root, misc_folder, existing_folders=None):
     """
-    Recursively scan inside `dst_root` (including misc subfolders) to find files
-    misplaced as per extension_to_folder mapping, and move them to correct folders.
-
-    Returns True if any file was moved.
+    Recursively scan inside `dst_root` to find misplaced files and move them.
     """
-    moved_any = False
     if existing_folders is None:
         existing_folders = discover_existing_folders(dst_root, misc_folder)
 
-    for root, dirs, files in os.walk(dst_root):
+    for root, _, files in os.walk(dst_root):
+        if 'metadata.json' in files and root != os.path.join(os.getcwd(), '.filecount_metadata'):
+            continue
+
         for file in files:
             if file == 'metadata.json':
-                continue  # Ignore metadata file itself
+                continue
 
             ext = os.path.splitext(file)[1].lower().lstrip('.')
 
+            folder_name_key = None
             if ext in extension_to_folder:
-                correct_folder_name = extension_to_folder[ext]
-                correct_folder_path = existing_folders.get(
-                    correct_folder_name.upper(), os.path.join(dst_root, correct_folder_name))
+                folder_name = extension_to_folder[ext]
+                folder_name_key = folder_name.upper()
+                correct_folder_path = existing_folders.get(folder_name_key, os.path.join(dst_root, *folder_name.split('/')))
             elif ext:
-                misc_key = f"{misc_folder}\\{ext.upper()}"
-                correct_folder_path = existing_folders.get(
-                    misc_key, os.path.join(dst_root, misc_folder, ext.upper()))
+                folder_name_key = f"{misc_folder}/{ext.upper()}"
+                correct_folder_path = existing_folders.get(folder_name_key, os.path.join(dst_root, misc_folder, ext.upper()))
             else:
-                noext_key = f"{misc_folder}\\NO_EXTENSION"
-                correct_folder_path = existing_folders.get(
-                    noext_key, os.path.join(dst_root, misc_folder, 'NO_EXTENSION'))
+                folder_name_key = f"{misc_folder}/NO_EXTENSION"
+                correct_folder_path = existing_folders.get(folder_name_key, os.path.join(dst_root, misc_folder, 'NO_EXTENSION'))
 
             os.makedirs(correct_folder_path, exist_ok=True)
+            if not existing_folders.get(folder_name_key):
+                existing_folders[folder_name_key] = correct_folder_path
 
             current_file_path = os.path.join(root, file)
 
-            # Move only if not already in the correct folder
             if os.path.abspath(root) != os.path.abspath(correct_folder_path):
                 dest_path = os.path.join(correct_folder_path, file)
                 base, extension = os.path.splitext(file)
@@ -202,28 +207,66 @@ def reorganize_internal_files(dst_root, misc_folder, existing_folders=None):
                     dest_path = os.path.join(correct_folder_path, f"{base}_{counter}{extension}")
                     counter += 1
                 shutil.move(current_file_path, dest_path)
-                print(f"Moved internal file: {current_file_path} --> {dest_path}")
-                moved_any = True
-
-    return moved_any
+                print(f"Reorganized internal file: {current_file_path} --> {dest_path}")
 
 
 if __name__ == '__main__':
-    # Mapping of extensions to desired folder names (keep your full mapping here)
+    # Structured extension mappings
     extension_to_folder = {
-        'jpg': 'IMAGES', 'jpeg': 'IMAGES', 'png': 'IMAGES', 'avif': 'IMAGES',
-        'webp': 'IMAGES', 'bmp': 'IMAGES', 'tiff': 'IMAGES', 'jfif': 'IMAGES',
-        'gif': 'GIFS',
-        'mp4': 'VIDEOS', 'mov': 'VIDEOS', 'mkv': 'VIDEOS', 'avi': 'VIDEOS',
-        'js': 'JS', 'json': 'JSON', 'css': 'CSS', 'html': 'HTML',
-        'log': 'LOG', 'pdf': 'PDFS', 'py': 'PYTHON', 'txt': 'TXT',
-        'zip': 'ZIPS', 'sk': 'SKRIPT',
-        'mp3': 'AUDIOS', 'wav': 'AUDIOS', 'flac': 'AUDIOS',
-        'aac': 'AUDIOS', 'ogg': 'AUDIOS', 'm4a': 'AUDIOS',
+        # -- MEDIA --
+        'jpg': 'MEDIA/IMAGES', 'jpeg': 'MEDIA/IMAGES', 'png': 'MEDIA/IMAGES', 'pdn': 'MEDIA/IMAGES',
+        'avif': 'MEDIA/IMAGES', 'webp': 'MEDIA/IMAGES', 'bmp': 'MEDIA/IMAGES',
+        'tiff': 'MEDIA/IMAGES', 'jfif': 'MEDIA/IMAGES', 'svg': 'MEDIA/IMAGES', 'ico': 'MEDIA/IMAGES',
+        'gif': 'MEDIA/GIFS',
+        'mp4': 'MEDIA/VIDEOS', 'mov': 'MEDIA/VIDEOS', 'mkv': 'MEDIA/VIDEOS', 'avi': 'MEDIA/VIDEOS', 'webm': 'MEDIA/VIDEOS',
+        'mp3': 'MEDIA/AUDIOS', 'wav': 'MEDIA/AUDIOS', 'flac': 'MEDIA/AUDIOS', 'oga': 'MEDIA/AUDIOS',
+        'aac': 'MEDIA/AUDIOS', 'ogg': 'MEDIA/AUDIOS', 'm4a': 'MEDIA/AUDIOS',
+        'srt': 'MEDIA/SUBTITLES',
+        'obj': 'MEDIA/3D_MODELS',
+
+        # -- DOCUMENTS & TEXT --
+        'pdf': 'DOCUMENTS/PDFS',
+        'docx': 'DOCUMENTS/WORD', 'doc': 'DOCUMENTS/WORD',
+        'xlsx': 'DOCUMENTS/EXCEL', 'xls': 'DOCUMENTS/EXCEL', 'csv': 'DOCUMENTS/EXCEL', 'xlsm': 'DOCUMENTS/EXCEL',
+        'pptx': 'DOCUMENTS/POWERPOINT', 'ppt': 'DOCUMENTS/POWERPOINT',
+        'txt': 'DOCUMENTS/TEXT', 'md': 'DOCUMENTS/MARKDOWN',
+
+        # -- FONTS --
+        'otf': 'FONTS', 'ttf': 'FONTS', 'woff': 'FONTS',
+
+        # -- DEVELOPMENT & CODE --
+        'py': 'DEVELOPMENT/PYTHON', 'cs': 'DEVELOPMENT/CSHARP',
+        'js': 'DEVELOPMENT/JAVASCRIPT', 'json': 'DEVELOPMENT/JSON',
+        'css': 'DEVELOPMENT/CSS', 'html': 'DEVELOPMENT/HTML', 'htm': 'DEVELOPMENT/HTML',
+        'sk': 'DEVELOPMENT/SKRIPT',
+        'yml': 'DEVELOPMENT/YAML', 'yaml': 'DEVELOPMENT/YAML', 'xml': 'DEVELOPMENT/XML',
+        'ps1': 'DEVELOPMENT/SCRIPTS', 'sh': 'DEVELOPMENT/SCRIPTS', 'bat': 'DEVELOPMENT/SCRIPTS', 'cmd': 'DEVELOPMENT/SCRIPTS',
+        'pyc': 'DEVELOPMENT/COMPILED', 'class': 'DEVELOPMENT/COMPILED',
+        'log': 'DEVELOPMENT/LOGS',
+        'cfg': 'DEVELOPMENT/CONFIG', 'ini': 'DEVELOPMENT/CONFIG', 'env': 'DEVELOPMENT/CONFIG',
+        'toml': 'DEVELOPMENT/CONFIG', 'properties': 'DEVELOPMENT/CONFIG',
+
+        # -- ARCHIVES & SYSTEM --
+        'zip': 'ARCHIVES/ZIPS', 'rar': 'ARCHIVES/ZIPS', '7z': 'ARCHIVES/ZIPS',
+        'tar': 'ARCHIVES/ZIPS', 'gz': 'ARCHIVES/ZIPS', 'xz': 'ARCHIVES/ZIPS', 'jar': 'ARCHIVES/ZIPS',
+        'exe': 'ARCHIVES/PROGRAMS', 'msi': 'ARCHIVES/PROGRAMS', 'apk': 'ARCHIVES/PROGRAMS',
+        'iso': 'ARCHIVES/DISK_IMAGES', 'img': 'ARCHIVES/DISK_IMAGES',
+        'ovpn': 'ARCHIVES/VPN', 'conf': 'ARCHIVES/VPN',
+        'reg': 'ARCHIVES/REGISTRY', 'pol': 'ARCHIVES/REGISTRY', 'inf': 'ARCHIVES/REGISTRY',
+        'bin': 'ARCHIVES/BINARY',
+        'dll': 'ARCHIVES/LIBRARIES',
+
+        # -- GAMING --
+        'litematic': 'GAMING/MINECRAFT', 'schem': 'GAMING/MINECRAFT', 'mrpack': 'GAMING/MINECRAFT',
+        'mcfunction': 'GAMING/MINECRAFT', 'mcpack': 'GAMING/MINECRAFT', 'dat': 'GAMING/MINECRAFT',
+        'nbt': 'GAMING/MINECRAFT', 'mcmeta': 'GAMING/MINECRAFT', 'mca': 'GAMING/MINECRAFT',
+        'dat_old': 'GAMING/MINECRAFT', 'snbt': 'GAMING/MINECRAFT',
+        'bo3': 'GAMING/COD',
+        'osk': 'GAMING/OSU',
     }
     try:
         move_files_by_extension(source_dir, dest_root)
-        print("File transfer complete. Check your ARCHIVES directory to verify.")
+        print("File transfer complete. Your archive has been elegantly reorganized.")
     except Exception as e:
         print(f"Error while processing: {e}")
         sys.exit(1)

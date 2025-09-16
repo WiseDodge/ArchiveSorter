@@ -6,24 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [1.0.0] - 2025-07-31
+## [1.0.0] - 2025-09-16
 
-This version marks a major milestone establishing the foundation of ArchiveSorter, including a robust organizational engine, metadata tracking, and self-correcting archive maintenance.
+This version marks the first stable release of ArchiveSorter, featuring a robust organizational engine, metadata tracking, a self-correcting archive, and a highly detailed, elegant folder structure.
 
 ### Added
-- **Core File Sorting Engine**: Organizes files from a source directory into a destination archive based on customizable `extension_to_folder` mappings.
-- **Recursive Internal Reorganization**: Added a self-correcting feature that recursively scans the entire destination archive (`dest_root`) to detect and move misplaced files.
-- **Audio File Mapping**: Explicit mapping for common audio formats such as `.mp3`, `.wav`, `.flac`, etc., routing these files into a dedicated `AUDIOS` folder.
-- **File Count Suffix Toggle**: Introduced a global boolean `ENABLE_FILE_COUNT` to control the inclusion of the `(File Count - N)` suffix in folder names.
-- **Centralized Metadata Management**: Refactored metadata handling from per-folder JSON files to a single centralized `.filecount_metadata/metadata.json`.
-- **Safe Duplicate Filename Handling**: Files with conflicting names in the destination are renamed to avoid overwriting.
-- **Dynamic Folder Creation**: Destination folders are created automatically as new file types are encountered.
+- **Elegant Nested Folder Structure**: Implemented a comprehensive, multi-level folder hierarchy for superior organization (e.g., `MEDIA/IMAGES`, `ARCHIVES/ZIPS`).
+- **Recursive Internal Reorganization**: Added a self-correcting feature that recursively scans the entire destination archive to detect and move misplaced files.
+- **Comprehensive File Type Support**: Massively expanded the `extension_to_folder` mapping to cover documents, media, development files, archives, fonts, and gaming files.
+- **File Count Suffix Toggle**: Introduced a global boolean `ENABLE_FILE_COUNT` to control the `(File Count - N)` suffix.
+- **Centralized Metadata Management**: Uses a single `metadata.json` for efficient state tracking.
 
 ### Changed
-- **Metadata Storage Evolution**: Consolidated per-folder JSON files into one centralized `metadata.json` for clarity and reliability.
+- **Project Goal**: Evolved from a simple sorter to a comprehensive archive management tool with a focus on an elegant, maintainable folder structure.
+- **Code Refinements**: Removed all unused variables and refined internal logic for better readability and efficiency.
 
 ### Fixed
-- **Windows Naming Errors**: Updated the folder suffix format from `[File Count: N]` to `(File Count - N)` for filesystem compatibility.
+- **Windows Naming Errors**: Updated the folder suffix format to be filesystem-compatible.
+- **Nested Path Handling**: Corrected logic in all functions to properly create and recognize nested folder paths.
 
 ---
 
@@ -31,7 +31,6 @@ This version marks a major milestone establishing the foundation of ArchiveSorte
 
 ### Upcoming Features & Improvements
 - **Advanced Duplicate Detection**: Utilize SHA-256 hashing to detect exact duplicate files.
-- **Metadata Enrichment**: Extend the centralized `metadata.json` to store per-file hashes, modification timestamps, and rename history.
+- **Metadata Enrichment**: Extend the `metadata.json` to store per-file hashes and timestamps for incremental operations.
 - **Incremental Reorganization**: Optimize subsequent runs by processing only folders that have changed.
 - **Date-Based Sorting**: Add functionality to organize files by year and month.
-- **Improved Usability and Documentation**: Create a detailed README with configuration examples and usage instructions.
