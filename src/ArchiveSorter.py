@@ -120,7 +120,7 @@ def move_files_by_extension(src, dst):
 
     metadata = load_metadata()
 
-    for root, dirs, files in os.walk(src):
+    for root, _, files in os.walk(src):
         for file in files:
             ext = os.path.splitext(file)[1].lower().lstrip('.')
 
@@ -147,12 +147,14 @@ def move_files_by_extension(src, dst):
                 counter += 1
 
             shutil.move(src_path, dest_path)
-            print(f"Moved: {src_path} --> {dest_path}")
+            try:
+                print(f"Moved: {src_path} --> {dest_path}")
+            except UnicodeEncodeError:
+                print(f"Moved file with special characters: {src_path.encode('utf-8', 'replace').decode()} --> {dest_path.encode('utf-8', 'replace').decode()}")
         break
 
     reorganize_internal_files(dst, misc_folder)
 
-    # Updates folder names and metadata for all primary and misc folders
     all_dirs = set()
     for root, dirs, _ in os.walk(dst):
         for d in dirs:
@@ -207,8 +209,10 @@ def reorganize_internal_files(dst_root, misc_folder, existing_folders=None):
                     dest_path = os.path.join(correct_folder_path, f"{base}_{counter}{extension}")
                     counter += 1
                 shutil.move(current_file_path, dest_path)
-                print(f"Reorganized internal file: {current_file_path} --> {dest_path}")
-
+                try:
+                    print(f"Reorganized internal file: {current_file_path} --> {dest_path}")
+                except UnicodeEncodeError:
+                    print(f"Reorganized file with special characters: {current_file_path.encode('utf-8', 'replace').decode()} --> {dest_path.encode('utf-8', 'replace').decode()}")
 
 if __name__ == '__main__':
     # Structured extension mappings
@@ -219,8 +223,8 @@ if __name__ == '__main__':
         'tiff': 'MEDIA/IMAGES', 'jfif': 'MEDIA/IMAGES', 'svg': 'MEDIA/IMAGES', 'ico': 'MEDIA/IMAGES',
         'gif': 'MEDIA/GIFS',
         'mp4': 'MEDIA/VIDEOS', 'mov': 'MEDIA/VIDEOS', 'mkv': 'MEDIA/VIDEOS', 'avi': 'MEDIA/VIDEOS', 'webm': 'MEDIA/VIDEOS',
-        'mp3': 'MEDIA/AUDIOS', 'wav': 'MEDIA/AUDIOS', 'flac': 'MEDIA/AUDIOS', 'oga': 'MEDIA/AUDIOS',
-        'aac': 'MEDIA/AUDIOS', 'ogg': 'MEDIA/AUDIOS', 'm4a': 'MEDIA/AUDIOS',
+        'mp3': 'MEDIA/AUDIO/MP3', 'wav': 'MEDIA/AUDIO/WAV', 'flac': 'MEDIA/AUDIO/FLAC', 'oga': 'MEDIA/AUDIO/OGA',
+        'aac': 'MEDIA/AUDIO/AAC', 'ogg': 'MEDIA/AUDIO/OGG', 'm4a': 'MEDIA/AUDIO/M4A',
         'srt': 'MEDIA/SUBTITLES',
         'obj': 'MEDIA/3D_MODELS',
 
@@ -257,16 +261,22 @@ if __name__ == '__main__':
         'dll': 'ARCHIVES/LIBRARIES',
 
         # -- GAMING --
-        'litematic': 'GAMING/MINECRAFT', 'schem': 'GAMING/MINECRAFT', 'mrpack': 'GAMING/MINECRAFT',
-        'mcfunction': 'GAMING/MINECRAFT', 'mcpack': 'GAMING/MINECRAFT', 'dat': 'GAMING/MINECRAFT',
-        'nbt': 'GAMING/MINECRAFT', 'mcmeta': 'GAMING/MINECRAFT', 'mca': 'GAMING/MINECRAFT',
-        'dat_old': 'GAMING/MINECRAFT', 'snbt': 'GAMING/MINECRAFT',
+        'mrpack': 'GAMING/MINECRAFT/MODPACKS',
+        'mcpack': 'GAMING/MINECRAFT/RESOURCE_PACKS', 'mcmeta': 'GAMING/MINECRAFT/RESOURCE_PACKS',
+        'litematic': 'GAMING/MINECRAFT/SCHEMATICS', 'schem': 'GAMING/MINECRAFT/SCHEMATICS',
+        'dat': 'GAMING/MINECRAFT/WORLD_DATA', 'nbt': 'GAMING/MINECRAFT/WORLD_DATA',
+        'mca': 'GAMING/MINECRAFT/WORLD_DATA', 'dat_old': 'GAMING/MINECRAFT/WORLD_DATA',
+        'snbt': 'GAMING/MINECRAFT/WORLD_DATA',
+        'mcfunction': 'GAMING/MINECRAFT/SCRIPTS',
         'bo3': 'GAMING/COD',
         'osk': 'GAMING/OSU',
-    }
+      }
     try:
         move_files_by_extension(source_dir, dest_root)
         print("File transfer complete. Your archive has been elegantly reorganized.")
     except Exception as e:
-        print(f"Error while processing: {e}")
+        try:
+            print(f"Error while processing: {e}")
+        except UnicodeEncodeError:
+            print(f"An error occurred with a file containing special characters that could not be displayed in the console.")
         sys.exit(1)
