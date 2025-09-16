@@ -77,16 +77,16 @@ def update_folder_name_with_file_count(folder_path, metadata, script_dir, cwd):
         new_folder_name = f"{base_name} (File Count - {current_count})"
     else:
         new_folder_name = base_name
-        
+
     if (ENABLE_FILE_COUNT and (previous_count != current_count or folder_name != new_folder_name)) or \
-         (not ENABLE_FILE_COUNT and folder_name != new_folder_name):
-    
+       (not ENABLE_FILE_COUNT and folder_name != new_folder_name):
+
         new_folder_path = os.path.join(folder_parent, new_folder_name)
         if not os.path.exists(new_folder_path):
             try:
                 os.rename(folder_path, new_folder_path)
                 print(f"Renamed folder: '{folder_name}' -> '{new_folder_name}'")
-                
+
                 if ENABLE_FILE_COUNT:
                     metadata[new_folder_path] = current_count
                     metadata.pop(folder_path_abs, None)
@@ -100,7 +100,6 @@ def update_folder_name_with_file_count(folder_path, metadata, script_dir, cwd):
             if ENABLE_FILE_COUNT:
                 metadata[folder_path_abs] = current_count
     else:
-        # Update metadata even if no rename occurred
         if ENABLE_FILE_COUNT:
             metadata[folder_path_abs] = current_count
         else:
@@ -134,15 +133,18 @@ def move_files_by_extension(src, dst):
 
             base, extension = os.path.splitext(file)
             counter = 1
-
             while os.path.exists(dest_path):
                 dest_path = os.path.join(dest_folder, f"{base}_{counter}{extension}")
                 counter += 1
+
             shutil.move(src_path, dest_path)
             print(f"Moved: {src_path} --> {dest_path}")
         break # Should process top-level files only
-    
+
     # Once the files are moved, update the file counts for all existing folders
+    internal_reorganized = reorganize_internal_files(dst, misc_folder, existing_folders)
+
+    # Update folder names and metadata for all primary and misc folders
     for folder in os.listdir(dst):
         full_folder_path = os.path.join(dst, folder)
         if os.path.isdir(full_folder_path) and strip_file_count_suffix(folder).upper() != misc_folder:
@@ -155,6 +157,56 @@ def move_files_by_extension(src, dst):
             if os.path.isdir(full_folder_path):
                 update_folder_name_with_file_count(full_folder_path, metadata, script_dir, cwd)
     save_metadata(metadata)
+
+def reorganize_internal_files(dst_root, misc_folder, existing_folders=None):
+    """
+    Recursively scan inside `dst_root` (including misc subfolders) to find files
+    misplaced as per extension_to_folder mapping, and move them to correct folders.
+
+    Returns True if any file was moved.
+    """
+    moved_any = False
+    if existing_folders is None:
+        existing_folders = discover_existing_folders(dst_root, misc_folder)
+
+    for root, dirs, files in os.walk(dst_root):
+        for file in files:
+            if file == 'metadata.json':
+                continue  # Ignore metadata file itself
+
+            ext = os.path.splitext(file)[1].lower().lstrip('.')
+
+            if ext in extension_to_folder:
+                correct_folder_name = extension_to_folder[ext]
+                correct_folder_path = existing_folders.get(
+                    correct_folder_name.upper(), os.path.join(dst_root, correct_folder_name))
+            elif ext:
+                misc_key = f"{misc_folder}\\{ext.upper()}"
+                correct_folder_path = existing_folders.get(
+                    misc_key, os.path.join(dst_root, misc_folder, ext.upper()))
+            else:
+                noext_key = f"{misc_folder}\\NO_EXTENSION"
+                correct_folder_path = existing_folders.get(
+                    noext_key, os.path.join(dst_root, misc_folder, 'NO_EXTENSION'))
+
+            os.makedirs(correct_folder_path, exist_ok=True)
+
+            current_file_path = os.path.join(root, file)
+
+            # Move only if not already in the correct folder
+            if os.path.abspath(root) != os.path.abspath(correct_folder_path):
+                dest_path = os.path.join(correct_folder_path, file)
+                base, extension = os.path.splitext(file)
+                counter = 1
+                while os.path.exists(dest_path):
+                    dest_path = os.path.join(correct_folder_path, f"{base}_{counter}{extension}")
+                    counter += 1
+                shutil.move(current_file_path, dest_path)
+                print(f"Moved internal file: {current_file_path} --> {dest_path}")
+                moved_any = True
+
+    return moved_any
+
 
 if __name__ == '__main__':
     # Mapping of extensions to desired folder names (keep your full mapping here)

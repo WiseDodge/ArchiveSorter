@@ -9,6 +9,7 @@ Keeps your downloads and miscellaneous files neatly organized by sorting files f
 ## 🚀 Features
 
 - 🗂️ **Automated File Sorting** — Organizes files by their extension into dedicated folders like `IMAGES`, `VIDEOS`, etc.
+- 🔄 **Recursive Reorganization** — Detects and relocates misplaced files inside the archive for future-proof cleanups.
 - 📁 **Dynamic Folder Creation** — Creates destination folders automatically for new file types.
 - 🔢 **File Count Suffix Toggle** — Optionally appends `(File Count - N)` to folder names; can be turned on or off via the `ENABLE_FILE_COUNT` variable.
 - 📊 **Centralized Metadata Tracking** — Maintains file counts in a `.filecount_metadata/metadata.json` for efficient operations.
@@ -18,7 +19,7 @@ Keeps your downloads and miscellaneous files neatly organized by sorting files f
 
 ## 📂 How It Works
 
-The script scans your `source_dir` and moves files into specific archive folders inside `dest_root`. Files with unknown or no extensions go into a `MISCELLANEOUS` folder. If enabled, it then updates folder names to reflect their current file counts.
+The script scans your `source_dir` and moves files into specific archive folders inside `dest_root`. It also recursively scans the entire destination archive to correct any misplaced files based on the current rules.
 
 ---
 
