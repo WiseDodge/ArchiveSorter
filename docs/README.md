@@ -8,8 +8,9 @@ Keeps your downloads and miscellaneous files neatly organized by sorting files f
 
 ## 🚀 Features
 
-- 🗂️ **Automated File Sorting** — Organizes files by their extension into dedicated folders like `IMAGES`, `VIDEOS`, etc.
+- 🗂️ **Automated File Sorting** — Organizes files by their extension into dedicated folders like `IMAGES`, `VIDEOS`, `AUDIOS`, etc.
 - 🔄 **Recursive Reorganization** — Detects and relocates misplaced files inside the archive for future-proof cleanups.
+- 🎵 **Audio File Support** — Sorts common audio files (mp3, wav, flac, etc.) into an `AUDIOS` folder.
 - 📁 **Dynamic Folder Creation** — Creates destination folders automatically for new file types.
 - 🔢 **File Count Suffix Toggle** — Optionally appends `(File Count - N)` to folder names; can be turned on or off via the `ENABLE_FILE_COUNT` variable.
 - 📊 **Centralized Metadata Tracking** — Maintains file counts in a `.filecount_metadata/metadata.json` for efficient operations.

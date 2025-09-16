@@ -6,7 +6,7 @@ import sys
 
 # Configure your source and destination here
 source_dir = r'D:\Downloads'
-dest_root = r'D:\CODING\ARCHIVES'
+dest_root = r'D:\CODING\ARCHIVES\DATABASE'
 misc_folder = 'MISCELLANEOUS'
 
 ENABLE_FILE_COUNT = False # Set to True to enable file count suffixing
@@ -218,6 +218,8 @@ if __name__ == '__main__':
         'js': 'JS', 'json': 'JSON', 'css': 'CSS', 'html': 'HTML',
         'log': 'LOG', 'pdf': 'PDFS', 'py': 'PYTHON', 'txt': 'TXT',
         'zip': 'ZIPS', 'sk': 'SKRIPT',
+        'mp3': 'AUDIOS', 'wav': 'AUDIOS', 'flac': 'AUDIOS',
+        'aac': 'AUDIOS', 'ogg': 'AUDIOS', 'm4a': 'AUDIOS',
     }
     try:
         move_files_by_extension(source_dir, dest_root)
