@@ -1,21 +1,21 @@
 # ArchiveSorter 📂
 
-**A Python-based automated file archive organizer with companion scripts for consolidation and analysis.**
+**A file management system for turning digital chaos into a clean, organized archive.**
 
-Keeps your downloads and miscellaneous files neatly organized by sorting them into a categorized, nested folder structure. When you need to find something, you can instantly reverse the process with the PowerShell consolidator, or analyze your files with the extension dumper.
+ArchiveSorter uses a powerful Python script to systematically sort files into a detailed, nested structure, making it effortless to locate what you need. For added flexibility, companion scripts are included to flatten the entire archive for bulk tasks or analyze your file types to help you refine your organization.
 
 ---
 ## ✨ Showcase
 
 **1. Organize with `ArchiveSorter.py`**
 
-Automatically sorts a messy folder into an elegant, nested structure.
+Automatically sorts a messy folder into an elegant, nested structure so you can find files easily.
 
 ![ArchiveSorter Demo](docs/assets/ArchiveSorter-Demo.gif)
 
 **2. Consolidate with `FileConsolidator.ps1`**
 
-Safely reverses the process, moving all files from the nested archive back into a single, flat folder.
+Safely reverses the process, moving all files from the nested archive back into a single, flat folder for tasks like bulk transfers.
 
 ![FileConsolidator Demo](docs/assets/FileConsolidator-Demo.gif)
 
@@ -51,7 +51,7 @@ By default, `ArchiveSorter.py` will organize your files into the following elega
 \<Destination\>/
 ├───ARCHIVES/
 │   ├───BINARY/
-│   ├───DISK\_IMAGES/
+│   ├───DISK_IMAGES/
 │   ├───LIBRARIES/
 │   ├───PROGRAMS/
 │   ├───REGISTRY/
