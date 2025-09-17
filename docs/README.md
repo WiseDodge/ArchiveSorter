@@ -1,4 +1,5 @@
 # ArchiveSorter 📂
+![GitHub last commit](https://img.shields.io/github/last-commit/WiseDodge/ArchiveSorter)
 
 **A file management system for turning digital chaos into a clean, organized archive.**
 
