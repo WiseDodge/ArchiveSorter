@@ -95,7 +95,7 @@ By default, `ArchiveSorter.py` will organize your files into the following elega
 │   └───OSU/
 │
 ├───MEDIA/
-│   ├───3D\_MODELS/
+│   ├───3D_MODELS/
 │   ├───AUDIO/
 │   │   ├───AAC/
 │   │   ├───FLAC/
