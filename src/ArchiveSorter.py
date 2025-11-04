@@ -239,7 +239,7 @@ if __name__ == '__main__':
         'otf': 'FONTS', 'ttf': 'FONTS', 'woff': 'FONTS',
 
         # -- DEVELOPMENT & CODE --
-        'py': 'DEVELOPMENT/PYTHON', 'cs': 'DEVELOPMENT/CSHARP',
+        'py': 'DEVELOPMENT/PYTHON', 'cs': 'DEVELOPMENT/CSHARP', 'java': 'DEVELOPMENT/JAVA',
         'js': 'DEVELOPMENT/JAVASCRIPT', 'json': 'DEVELOPMENT/JSON',
         'css': 'DEVELOPMENT/CSS', 'html': 'DEVELOPMENT/HTML', 'htm': 'DEVELOPMENT/HTML',
         'sk': 'DEVELOPMENT/SKRIPT',
@@ -253,6 +253,7 @@ if __name__ == '__main__':
         # -- ARCHIVES & SYSTEM --
         'zip': 'ARCHIVES/ZIPS', 'rar': 'ARCHIVES/ZIPS', '7z': 'ARCHIVES/ZIPS',
         'tar': 'ARCHIVES/ZIPS', 'gz': 'ARCHIVES/ZIPS', 'xz': 'ARCHIVES/ZIPS', 'jar': 'ARCHIVES/ZIPS',
+        'tar.gz': 'ARCHIVES/SERVER_BACKUPS',
         'exe': 'ARCHIVES/PROGRAMS', 'msi': 'ARCHIVES/PROGRAMS', 'apk': 'ARCHIVES/PROGRAMS',
         'iso': 'ARCHIVES/DISK_IMAGES', 'img': 'ARCHIVES/DISK_IMAGES',
         'ovpn': 'ARCHIVES/VPN', 'conf': 'ARCHIVES/VPN',
