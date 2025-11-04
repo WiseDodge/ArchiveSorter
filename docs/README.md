@@ -1,4 +1,5 @@
 # ArchiveSorter 📂
+![GitHub last commit](https://img.shields.io/github/last-commit/WiseDodge/ArchiveSorter)
 
 **A file management system for turning digital chaos into a clean, organized archive.**
 
@@ -94,7 +95,7 @@ By default, `ArchiveSorter.py` will organize your files into the following elega
 │   └───OSU/
 │
 ├───MEDIA/
-│   ├───3D\_MODELS/
+│   ├───3D_MODELS/
 │   ├───AUDIO/
 │   │   ├───AAC/
 │   │   ├───FLAC/
