@@ -12,13 +12,13 @@ ArchiveSorter uses a powerful Python script to systematically sort files into a 
 
 Automatically sorts a messy folder into an elegant, nested structure so you can find files easily.
 
-![ArchiveSorter Demo](https://raw.githubusercontent.com/WiseDodge/ArchiveSorter/main/docs/assets/ArchiveSorter-Demo.gif)
+![ArchiveSorter Demo](https://raw.githubusercontent.com/WiseDodge/ArchiveSorter/refs/heads/main/docs/assets/ARCHIVESORTER_ArchiveSorted.gif)
 
 **2. Consolidate with `FileConsolidator.ps1`**
 
 Safely reverses the process, moving all files from the nested archive back into a single, flat folder for tasks like bulk transfers.
 
-![FileConsolidator Demo](https://raw.githubusercontent.com/WiseDodge/ArchiveSorter/main/docs/assets/FileConsolidator-Demo.gif)
+![FileConsolidator Demo](https://raw.githubusercontent.com/WiseDodge/ArchiveSorter/main/docs/assets/ARCHIVESORTER_Unarchived.gif)
 
 ---
 
