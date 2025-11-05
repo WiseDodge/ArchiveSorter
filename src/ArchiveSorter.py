@@ -19,6 +19,14 @@ metadata_file_path = os.path.join(metadata_folder, 'metadata.json')
 # Regex to strip the (File Count - N) suffix from folder names
 FILE_COUNT_SUFFIX_RE = re.compile(r'^(.*?)(\s*\(File Count - \d+\))?$', re.IGNORECASE)
 
+def get_extension(filename):
+    compound_exts = ['.tar.gz', '.tar.xz', '.tar.bz2']
+    filename_lower = filename.lower()
+    for ext in compound_exts:
+        if filename_lower.endswith(ext):
+            return ext[1:]
+    return os.path.splitext(filename_lower)[1][1:]
+
 def strip_file_count_suffix(folder_name):
     match = FILE_COUNT_SUFFIX_RE.match(folder_name)
     if match:
@@ -122,7 +130,8 @@ def move_files_by_extension(src, dst):
 
     for root, _, files in os.walk(src):
         for file in files:
-            ext = os.path.splitext(file)[1].lower().lstrip('.')
+            # ext = os.path.splitext(file)[1].lower().lstrip('.')
+            ext = get_extension(file)
 
             if ext in extension_to_folder:
                 folder_name = extension_to_folder[ext]
@@ -181,7 +190,8 @@ def reorganize_internal_files(dst_root, misc_folder, existing_folders=None):
             if file == 'metadata.json':
                 continue
 
-            ext = os.path.splitext(file)[1].lower().lstrip('.')
+            # ext = os.path.splitext(file)[1].lower().lstrip('.')
+            ext = get_extension(file)
 
             folder_name_key = None
             if ext in extension_to_folder:
@@ -251,9 +261,10 @@ if __name__ == '__main__':
         'toml': 'DEVELOPMENT/CONFIG', 'properties': 'DEVELOPMENT/CONFIG',
 
         # -- ARCHIVES & SYSTEM --
-        'zip': 'ARCHIVES/ZIPS', 'rar': 'ARCHIVES/ZIPS', '7z': 'ARCHIVES/ZIPS',
-        'tar': 'ARCHIVES/ZIPS', 'gz': 'ARCHIVES/ZIPS', 'xz': 'ARCHIVES/ZIPS', 'jar': 'ARCHIVES/ZIPS',
-        'tar.gz': 'ARCHIVES/SERVER_BACKUPS',
+        'zip': 'ARCHIVES/COMPRESSED/ZIP', 'rar': 'ARCHIVES/COMPRESSED/RAR', '7z': 'ARCHIVES/COMPRESSED/7Z',
+        'tar': 'ARCHIVES/COMPRESSED/TAR', 'tar.xz': 'ARCHIVES/COMPRESSED/TAR', 'tar.bz2': 'ARCHIVES/COMPRESSED/TAR',
+        'gz': 'ARCHIVES/SERVER_BACKUPS', 'tar.gz': 'ARCHIVES/SERVER_BACKUPS', 'tgz': 'ARCHIVES/SERVER_BACKUPS',
+        'jar': 'ARCHIVES/JAR',
         'exe': 'ARCHIVES/PROGRAMS', 'msi': 'ARCHIVES/PROGRAMS', 'apk': 'ARCHIVES/PROGRAMS',
         'iso': 'ARCHIVES/DISK_IMAGES', 'img': 'ARCHIVES/DISK_IMAGES',
         'ovpn': 'ARCHIVES/VPN', 'conf': 'ARCHIVES/VPN',
@@ -269,9 +280,10 @@ if __name__ == '__main__':
         'mca': 'GAMING/MINECRAFT/WORLD_DATA', 'dat_old': 'GAMING/MINECRAFT/WORLD_DATA',
         'snbt': 'GAMING/MINECRAFT/WORLD_DATA',
         'mcfunction': 'GAMING/MINECRAFT/SCRIPTS',
+        'sparkhealth': 'GAMING/MINECRAFT/SPARKHEALTH',
         'bo3': 'GAMING/COD',
         'osk': 'GAMING/OSU',
-      }
+    }
     try:
         move_files_by_extension(source_dir, dest_root)
         print("File transfer complete. Your archive has been elegantly reorganized.")

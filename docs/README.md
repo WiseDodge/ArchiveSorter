@@ -52,12 +52,18 @@ By default, `ArchiveSorter.py` will organize your files into the following elega
 \<Destination\>/
 ├───ARCHIVES/
 │   ├───BINARY/
+│   ├───COMPRESSED/
+│   │   ├───7Z/
+│   │   ├───RAR/
+│   │   ├───TAR/
+│   │   └───ZIP/
 │   ├───DISK_IMAGES/
+│   ├───JAR/
 │   ├───LIBRARIES/
 │   ├───PROGRAMS/
 │   ├───REGISTRY/
-│   ├───VPN/
-│   └───ZIPS/
+│   ├───SERVER_BACKUPS/
+│   └───VPN/
 │
 ├───DEVELOPMENT/
 │   ├───COMPILED/
@@ -65,6 +71,7 @@ By default, `ArchiveSorter.py` will organize your files into the following elega
 │   ├───CSHARP/
 │   ├───CSS/
 │   ├───HTML/
+│   ├───JAVA/
 │   ├───JAVASCRIPT/
 │   ├───JSON/
 │   ├───LOGS/
@@ -91,6 +98,7 @@ By default, `ArchiveSorter.py` will organize your files into the following elega
 │   │   ├───RESOURCE_PACKS/
 │   │   ├───SCHEMATICS/
 │   │   ├───SCRIPTS/
+│   │   ├───SPARKHEALTH/
 │   │   └───WORLD_DATA/
 │   └───OSU/
 │
@@ -110,6 +118,7 @@ By default, `ArchiveSorter.py` will organize your files into the following elega
 │   └───VIDEOS/
 │
 └───MISCELLANEOUS/
+    └───(Folders for any unmapped extensions)
 
 ````
 
